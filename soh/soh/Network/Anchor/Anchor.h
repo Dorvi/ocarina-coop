@@ -91,6 +91,11 @@ typedef struct {
     u8  syncEpona;               // 0 = off (default), 1 = spawn phantom horse under remote riders
     u8  battleRoyaleMode;        // 0 = off (default), 1 = on (PvP, kill tracking, wanted system)
     u8  brFreshStart;            // 0 = off (default), 1 = reset inventory/health/rupees on MATCH_START
+    // Co-op health scaling (see CoopHealthScale.h). Percent of extra HP per additional
+    // player in the same room: 100 = 2 players -> 2x, 3 players -> 3x. 0 = off.
+    u16 bossHealthBonus;         // bosses (and mini-bosses if minibossesAsBosses), default 100
+    u16 enemyHealthBonus;        // regular enemies, default 0 (off)
+    u8  minibossesAsBosses;      // 1 (default) = Iron Knuckle, Stalfos, Dark Link, ... use bossHealthBonus
 } RoomState;
 
 class Anchor : public Network {

@@ -36,6 +36,9 @@ nlohmann::json Anchor::PrepRoomState() {
         payload["syncEpona"]         = 0;
         payload["battleRoyaleMode"] = 0;
         payload["brFreshStart"]     = 0;
+        payload["bossHealthBonus"]    = 0;
+        payload["enemyHealthBonus"]   = 0;
+        payload["minibossesAsBosses"] = 1;
     } else {
         payload["pvpMode"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.PvpMode"), 1);
         payload["showLocationsMode"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.ShowLocationsMode"), 1);
@@ -53,6 +56,9 @@ nlohmann::json Anchor::PrepRoomState() {
         payload["syncEpona"]             = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.SyncEpona"),         1);
         payload["battleRoyaleMode"]      = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BattleRoyaleMode"),   0);
         payload["brFreshStart"]          = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BrFreshStart"),       0);
+        payload["bossHealthBonus"]       = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BossHealthBonus"),    100);
+        payload["enemyHealthBonus"]      = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.EnemyHealthBonus"),   0);
+        payload["minibossesAsBosses"]    = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.MinibossesAsBosses"), 1);
     }
 
     return payload;
@@ -90,4 +96,8 @@ void Anchor::HandlePacket_UpdateRoomState(nlohmann::json payload) {
     roomState.syncEpona             = payload["state"].value("syncEpona",             (u8)1);
     roomState.battleRoyaleMode      = payload["state"].value("battleRoyaleMode",      (u8)0);
     roomState.brFreshStart          = payload["state"].value("brFreshStart",          (u8)0);
+    // Older hosts don't send these: default to no scaling so mixed versions stay in agreement.
+    roomState.bossHealthBonus       = payload["state"].value("bossHealthBonus",       (u16)0);
+    roomState.enemyHealthBonus      = payload["state"].value("enemyHealthBonus",      (u16)0);
+    roomState.minibossesAsBosses    = payload["state"].value("minibossesAsBosses",    (u8)1);
 }

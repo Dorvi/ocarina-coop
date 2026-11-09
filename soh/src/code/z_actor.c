@@ -58,6 +58,7 @@
 #include "textures/place_title_cards/g_pn_32.h"
 #include "textures/place_title_cards/g_pn_33.h"
 #include "textures/place_title_cards/g_pn_34.h"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 #include "textures/place_title_cards/g_pn_35.h"
 #include "textures/place_title_cards/g_pn_36.h"
 #include "textures/place_title_cards/g_pn_37.h"
@@ -4776,10 +4777,13 @@ u8 func_800355E4(PlayState* play, Collider* collider) {
 }
 
 u8 Actor_ApplyDamage(Actor* actor) {
-    if (actor->colChkInfo.damage >= actor->colChkInfo.health) {
+    // Co-op: scale the hit for the number of players fighting (no-op in single player).
+    s32 damage = Anchor_ScaleIncomingDamage(actor, actor->colChkInfo.damage);
+
+    if (damage >= actor->colChkInfo.health) {
         actor->colChkInfo.health = 0;
     } else {
-        actor->colChkInfo.health -= actor->colChkInfo.damage;
+        actor->colChkInfo.health -= damage;
     }
 
     return actor->colChkInfo.health;

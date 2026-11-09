@@ -16,6 +16,7 @@
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 
 #include <string.h>
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -1796,7 +1797,7 @@ void BossMo_CoreCollisionCheck(BossMo* this, PlayState* play) {
                 this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
                 this->work[MO_CORE_DMG_FLASH_TIMER] = 15;
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_MOFER_CORE_DAMAGE);
-                this->actor.colChkInfo.health -= damage;
+                this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, damage);
                 this->hitCount++;
                 if ((s8)this->actor.colChkInfo.health <= 0) {
                     if (((sMorphaTent1->csCamera == 0) && (sMorphaTent2 == NULL)) ||

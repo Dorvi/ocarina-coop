@@ -11,6 +11,7 @@
 #include "vt.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -844,7 +845,7 @@ void BossFd2_CollisionCheck(BossFd2* this, PlayState* play) {
         hurtbox = this->collider.elements[0].info.acHitInfo;
         if (!bossFd->faceExposed) {
             if (hurtbox->toucher.dmgFlags & 0x40000040) {
-                bossFd->actor.colChkInfo.health -= 2;
+                bossFd->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&bossFd->actor, 2);
                 if ((s8)bossFd->actor.colChkInfo.health <= 2) {
                     bossFd->actor.colChkInfo.health = 1;
                 }
@@ -883,7 +884,7 @@ void BossFd2_CollisionCheck(BossFd2* this, PlayState* play) {
                 damage = 0;
             }
             if (((s8)bossFd->actor.colChkInfo.health > 2) || canKill) {
-                bossFd->actor.colChkInfo.health -= damage;
+                bossFd->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&bossFd->actor, damage);
                 osSyncPrintf(VT_FGCOL(GREEN));
                 osSyncPrintf("damage   %d\n", damage);
             }

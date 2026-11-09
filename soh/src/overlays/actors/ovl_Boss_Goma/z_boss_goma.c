@@ -7,6 +7,7 @@
 #include "soh/OTRGlobals.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -1837,7 +1838,7 @@ void BossGoma_UpdateHit(BossGoma* this, PlayState* play) {
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOMA_DAM2);
             } else if (this->actionFunc == BossGoma_FloorStunned &&
                        (damage = CollisionCheck_GetSwordDamage(acHitInfo->toucher.dmgFlags, play)) != 0) {
-                this->actor.colChkInfo.health -= damage;
+                this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, damage);
 
                 if ((s8)this->actor.colChkInfo.health > 0) {
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_GOMA_DAM1);

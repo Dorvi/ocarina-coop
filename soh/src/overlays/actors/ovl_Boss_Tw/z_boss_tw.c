@@ -8,6 +8,7 @@
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 
 #include <string.h>
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -5265,7 +5266,7 @@ void BossTw_TwinrovaDamage(BossTw* this, PlayState* play, u8 damage) {
         this->workf[ANIM_SW_TGT] = Animation_GetLastFrame(&gTwinrovaDamageAnim);
         this->csState1 = 1;
 
-        if ((s8)(this->actor.colChkInfo.health -= damage) < 0) {
+        if ((s8)(this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, damage)) < 0) {
             this->actor.colChkInfo.health = 0;
         }
 

@@ -16,6 +16,7 @@
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -1295,9 +1296,12 @@ void BossFd_CollisionCheck(BossFd* this, PlayState* play) {
     if (headCollider->info.bumperFlags & BUMP_HIT) {
         headCollider->info.bumperFlags &= ~BUMP_HIT;
         hurtbox = headCollider->info.acHitInfo;
-        this->actor.colChkInfo.health -= 2;
-        if (hurtbox->toucher.dmgFlags & 0x1000) {
-            this->actor.colChkInfo.health -= 2;
+        {
+            s32 headDamage = 2;
+            if (hurtbox->toucher.dmgFlags & 0x1000) {
+                headDamage += 2;
+            }
+            this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, headDamage);
         }
         if ((s8)this->actor.colChkInfo.health <= 2) {
             this->actor.colChkInfo.health = 2;

@@ -18,6 +18,7 @@
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -1400,7 +1401,7 @@ void BossVa_BodyPhase4(BossVa* this, PlayState* play) {
                     this->actor.world.rot.y = this->actor.yawTowardsPlayer;
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_BALINADE_DAMAGE);
                     Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 12);
-                    sPhase4HP -= this->actor.colChkInfo.damage;
+                    sPhase4HP -= Anchor_ScaleIncomingDamage(&this->actor, this->actor.colChkInfo.damage);
                     if (sPhase4HP <= 0) {
                         this->timer = 0;
                         sFightPhase++;

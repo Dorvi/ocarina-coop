@@ -10,6 +10,7 @@
 
 #include <stdlib.h> // malloc
 #include <string.h> // memcpy
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -740,7 +741,7 @@ void BossDodongo_Explode(BossDodongo* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_IT_BOMB_EXPLOSION);
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DAMAGE);
         func_80033E88(&this->actor, play, 4, 10);
-        this->health -= 2;
+        this->health -= Anchor_ScaleIncomingDamage(&this->actor, 2);
 
         // make sure not to die from the bomb explosion
         if (this->health <= 0) {
@@ -1522,7 +1523,7 @@ void BossDodongo_UpdateDamage(BossDodongo* this, PlayState* play) {
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DAMAGE);
                     BossDodongo_SetupDamaged(this);
                     this->unk_1C0 = 5;
-                    this->health -= swordDamage;
+                    this->health -= Anchor_ScaleIncomingDamage(&this->actor, swordDamage);
                 }
             }
         }

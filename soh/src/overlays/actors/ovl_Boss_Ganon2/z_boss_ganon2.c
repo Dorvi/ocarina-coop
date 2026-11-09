@@ -55,6 +55,7 @@ const ActorInit Boss_Ganon2_InitVars = {
 };
 
 #include "z_boss_ganon2_data.c"
+#include "soh/Network/Anchor/CoopHealthScale.h"
 
 Vec3f D_8090EB20;
 
@@ -1959,7 +1960,7 @@ void BossGanon2_CollisionCheck(BossGanon2* this, PlayState* play) {
                     this->unk_342 = 5;
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_MGANON_DAMAGE);
                     Audio_StopSfxById(NA_SE_EN_MGANON_UNARI);
-                    this->actor.colChkInfo.health -= 2;
+                    this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, 2);
                     temp_v0_4 = this->actor.colChkInfo.health;
                     if (temp_v0_4 < 0x15 && this->unk_334 == 0) {
                         func_80900818(this, play);
@@ -1993,7 +1994,7 @@ void BossGanon2_CollisionCheck(BossGanon2* this, PlayState* play) {
                     phi_v1_2 = 2;
                 }
             }
-            this->actor.colChkInfo.health -= phi_v1_2;
+            this->actor.colChkInfo.health -= Anchor_ScaleIncomingDamage(&this->actor, phi_v1_2);
             temp_v0_4 = this->actor.colChkInfo.health;
             if ((temp_v0_4 < 0x15) && (this->unk_334 == 0)) {
                 func_80900818(this, play);

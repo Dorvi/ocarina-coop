@@ -274,6 +274,54 @@ void AnchorAdminMenu(WidgetInfo& info) {
         anchor->SendPacket_UpdateRoomState();
     }
 
+    ImGui::Spacing();
+    ImGui::SeparatorText("Co-op Health Scaling");
+
+    {
+        int bossBonus = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BossHealthBonus"), 100);
+        UIWidgets::PushStyleSlider(THEME_COLOR);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        if (ImGui::SliderInt("##BossHealthBonus", &bossBonus, 0, 200,
+                             bossBonus == 0 ? "Boss HP: off" : "Boss HP: +%d%% per extra player")) {
+            bossBonus = (bossBonus + 12) / 25 * 25; // snap to 25% steps
+            CVarSetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BossHealthBonus"), bossBonus);
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+            anchor->SendPacket_UpdateRoomState();
+        }
+        UIWidgets::PopStyleSlider();
+        UIWidgets::Tooltip("Makes bosses last longer when several players fight together.\n\n"
+                           "Counts the players in the same room as the boss.\n"
+                           "+100% = 2 players need 2x the hits, 3 players 3x, and so on.\n"
+                           "+50%  = 2 players 1.5x, 3 players 2x.\n\n"
+                           "Works by shrinking each hit, so every boss phase still triggers\n"
+                           "at the same point it does in the original game.");
+    }
+
+    if (UIWidgets::CVarCheckbox("Mini-bosses count as bosses", CVAR_REMOTE_ANCHOR("RoomSettings.MinibossesAsBosses"),
+                                UIWidgets::CheckboxOptions()
+                                    .DefaultValue(true)
+                                    .Color(THEME_COLOR)
+                                    .Tooltip("Iron Knuckle, Stalfos, Dark Link, Flare Dancer, Big Octo,\n"
+                                             "Dead Hand and Lizalfos/Dinolfos use the Boss HP setting\n"
+                                             "instead of the Enemy HP setting."))) {
+        anchor->SendPacket_UpdateRoomState();
+    }
+
+    {
+        int enemyBonus = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.EnemyHealthBonus"), 0);
+        UIWidgets::PushStyleSlider(THEME_COLOR);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        if (ImGui::SliderInt("##EnemyHealthBonus", &enemyBonus, 0, 200,
+                             enemyBonus == 0 ? "Enemy HP: off" : "Enemy HP: +%d%% per extra player")) {
+            enemyBonus = (enemyBonus + 12) / 25 * 25;
+            CVarSetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.EnemyHealthBonus"), enemyBonus);
+            Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
+            anchor->SendPacket_UpdateRoomState();
+        }
+        UIWidgets::PopStyleSlider();
+        UIWidgets::Tooltip("Same as Boss HP, for regular enemies. Off by default.");
+    }
+
     ImGui::EndDisabled();
 
     ImGui::Spacing();

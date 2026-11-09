@@ -1,4 +1,5 @@
 #include "Anchor.h"
+#include "CoopHealthScale.h"
 #include <libultraship/libultraship.h>
 #include <chrono>
 #include "soh/Enhancements/cosmetics/cosmeticsTypes.h"
@@ -1071,6 +1072,7 @@ void Anchor::RegisterHooks() {
 
     // Clear tracked health maps whenever the scene changes so stale keys don't accumulate.
     COND_HOOK(OnSceneInit, isConnected, [&](s16 sceneNum) {
+        Anchor_ResetDamageScaling();
         csOrphanFrames = 0;
         csFrozenFrames = 0;
         trackedEnemyHealth.clear();
