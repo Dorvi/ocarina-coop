@@ -23,6 +23,7 @@ nlohmann::json Anchor::PrepRoomState() {
         payload["syncItemsAndFlags"] = 0;
         payload["sharedBosses"] = 0;
         payload["bossHealthBonus"] = 0;
+        payload["sharedEnemies"] = 0;
     } else {
         payload["pvpMode"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.PvpMode"), 1);
         payload["showLocationsMode"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.ShowLocationsMode"), 1);
@@ -30,6 +31,7 @@ nlohmann::json Anchor::PrepRoomState() {
         payload["syncItemsAndFlags"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.SyncItemsAndFlags"), 1);
         payload["sharedBosses"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.SharedBosses"), 1);
         payload["bossHealthBonus"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.BossHealthBonus"), 100);
+        payload["sharedEnemies"] = CVarGetInteger(CVAR_REMOTE_ANCHOR("RoomSettings.SharedEnemies"), 1);
     }
 
     return payload;
@@ -56,4 +58,5 @@ void Anchor::HandlePacket_UpdateRoomState(nlohmann::json payload) {
     // Room owners without the co-op boss mod don't send these: treat as off.
     roomState.sharedBosses = payload["state"].value("sharedBosses", (u8)0);
     roomState.bossHealthBonus = payload["state"].value("bossHealthBonus", (u16)0);
+    roomState.sharedEnemies = payload["state"].value("sharedEnemies", (u8)0);
 }

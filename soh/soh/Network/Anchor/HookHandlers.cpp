@@ -55,6 +55,7 @@ float OTRGetDimensionFromRightEdge(float v);
 
 void Anchor::RegisterHooks() {
     RegisterCoopBossHooks();
+    RegisterCoopEnemiesHooks();
 
     // #region Hooks that are required for basic Anchor functionality
 

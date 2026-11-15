@@ -17,6 +17,7 @@ extern "C" {
 #include "src/overlays/actors/ovl_Boss_Sst/z_boss_sst.h"
 #include "src/overlays/actors/ovl_Boss_Va/z_boss_va.h"
 extern PlayState* gPlayState;
+void BossGoma_CoopForceDefeat(Actor* thisx, PlayState* play);
 }
 
 /**
@@ -30,6 +31,10 @@ extern PlayState* gPlayState;
 
 namespace {
 
+// How long (in game frames) a teammate's kill waits for a local cutscene (boss intro, ...) to
+// end before giving up on the death sequence and reloading the room instead.
+constexpr int kPendingDefeatFrames = 300;
+
 // How often (in game frames, 20/s) the current boss HP is re-broadcast. Covers late
 // joiners, respawns after a game over and lost packets.
 constexpr int kHeartbeatFrames = 20;
@@ -40,6 +45,10 @@ struct CoopBossState {
     bool defeated = false; // boss of this scene visit was defeated (locally or remotely)
     s32 lastSentHp = -1;   // last HP we told the others about
     int heartbeatTimer = 0;
+    // A teammate killed the boss and our copy still has to play its death sequence.
+    s16 pendingDefeatActorId = -1;
+    s8 pendingDefeatRoom = -1;
+    int pendingDefeatTimer = 0;
     // Fractional damage carried over between hits, per actor instance.
     std::unordered_map<const Actor*, float> carry;
 };
@@ -144,6 +153,40 @@ void SetBossHp(Actor* actor, s32 hp) {
 bool IsTransitioning() {
     return gPlayState->transitionTrigger != TRANS_TRIGGER_OFF || gPlayState->transitionMode != TRANS_MODE_OFF ||
            gPlayState->gameOverCtx.state != GAMEOVER_INACTIVE;
+}
+
+// Bosses whose own death sequence can be started from any state.
+bool HasNativeDefeat(s16 actorId) {
+    return actorId == ACTOR_BOSS_GOMA || actorId == ACTOR_BOSS_DODONGO;
+}
+
+// Starts the boss's own death sequence, as if the local player had landed the killing blow.
+void StartNativeDefeat(Actor* boss) {
+    switch (boss->id) {
+        case ACTOR_BOSS_GOMA:
+            BossGoma_CoopForceDefeat(boss, gPlayState);
+            break;
+        case ACTOR_BOSS_DODONGO:
+            // King Dodongo checks his health every frame and starts his death cutscene himself.
+            ((BossDodongo*)boss)->health = 0;
+            break;
+        default:
+            break;
+    }
+}
+
+// Fallback for bosses without StartNativeDefeat: mark the room as cleared and reload it. On
+// load every boss takes its own "already defeated" path (blue warp + heart container).
+void ReloadClearedBossRoom(s8 roomNum) {
+    Flags_SetClear(gPlayState, roomNum);
+    gSaveContext.sceneFlags[gPlayState->sceneNum].clear |= (1 << roomNum);
+
+    if (!IsTransitioning()) {
+        gPlayState->nextEntranceIndex = gSaveContext.entranceIndex;
+        gPlayState->transitionTrigger = TRANS_TRIGGER_START;
+        gPlayState->transitionType = TRANS_TYPE_FADE_BLACK_FAST;
+        gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK_FAST;
+    }
 }
 
 } // namespace
@@ -314,17 +357,16 @@ void Anchor::HandlePacket_BossDefeated(nlohmann::json payload) {
         return;
     }
 
-    // Dungeon bosses: mark the room as cleared and reload it. On load every boss takes its
-    // own "already defeated" path, which spawns the blue warp and the heart container.
-    Flags_SetClear(gPlayState, roomNum);
-    gSaveContext.sceneFlags[gPlayState->sceneNum].clear |= (1 << roomNum);
-
-    if (!IsTransitioning()) {
-        gPlayState->nextEntranceIndex = gSaveContext.entranceIndex;
-        gPlayState->transitionTrigger = TRANS_TRIGGER_START;
-        gPlayState->transitionType = TRANS_TYPE_FADE_BLACK_FAST;
-        gSaveContext.nextTransitionType = TRANS_TYPE_FADE_BLACK_FAST;
+    if (HasNativeDefeat(actorId)) {
+        // Play the boss's death sequence here too (started from the per-frame hook, once no
+        // other cutscene is running).
+        sState.pendingDefeatActorId = actorId;
+        sState.pendingDefeatRoom = roomNum;
+        sState.pendingDefeatTimer = 0;
+        return;
     }
+
+    ReloadClearedBossRoom(roomNum);
 }
 
 // MARK: - Hooks
@@ -362,6 +404,20 @@ void Anchor::RegisterCoopBossHooks() {
         }
 
         ResetStateIfSceneChanged();
+
+        if (sState.pendingDefeatActorId != -1 && !IsTransitioning()) {
+            Actor* doomedBoss = FindSharedBoss(sState.pendingDefeatActorId);
+            if (doomedBoss == nullptr) {
+                sState.pendingDefeatActorId = -1;
+            } else if (!Play_InCsMode(gPlayState)) {
+                sState.pendingDefeatActorId = -1;
+                StartNativeDefeat(doomedBoss);
+            } else if (++sState.pendingDefeatTimer > kPendingDefeatFrames) {
+                sState.pendingDefeatActorId = -1;
+                ReloadClearedBossRoom(sState.pendingDefeatRoom);
+            }
+        }
+
         if (sState.defeated || IsTransitioning()) {
             return;
         }

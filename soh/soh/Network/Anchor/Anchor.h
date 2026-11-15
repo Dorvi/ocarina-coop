@@ -71,6 +71,8 @@ typedef struct {
     // Co-op bosses (see CoopBoss.h)
     u8 sharedBosses;     // 0 = off, 1 = on: teammates in the same boss room share one boss health pool
     u16 bossHealthBonus; // extra boss HP per additional teammate in the room, in percent (100 = 2 players -> 2x)
+    // Co-op enemies (see CoopEnemies.h)
+    u8 sharedEnemies; // 0 = off, 1 = on: an enemy killed by a teammate in the room dies for everyone
 } RoomState;
 
 class Anchor : public Network {
@@ -89,6 +91,7 @@ class Anchor : public Network {
     nlohmann::json PrepRoomState();
     void RegisterHooks();
     void RegisterCoopBossHooks();
+    void RegisterCoopEnemiesHooks();
     void RefreshClientActors();
     void SetDummyPlayerClientId(const Actor* actor, uint32_t clientId);
 
@@ -98,6 +101,7 @@ class Anchor : public Network {
     void HandlePacket_ConsumeAdultTradeItem(nlohmann::json payload);
     void HandlePacket_DamagePlayer(nlohmann::json payload);
     void HandlePacket_DisableAnchor(nlohmann::json payload);
+    void HandlePacket_EnemyDefeated(nlohmann::json payload);
     void HandlePacket_EntranceDiscovered(nlohmann::json payload);
     void HandlePacket_GameComplete(nlohmann::json payload);
     void HandlePacket_GiveItem(nlohmann::json payload);
@@ -127,6 +131,7 @@ class Anchor : public Network {
     inline static const std::string BOSS_HP = "BOSS_HP";
     inline static const std::string DAMAGE_PLAYER = "DAMAGE_PLAYER";
     inline static const std::string DISABLE_ANCHOR = "DISABLE_ANCHOR";
+    inline static const std::string ENEMY_DEFEATED = "ENEMY_DEFEATED";
     inline static const std::string ENTRANCE_DISCOVERED = "ENTRANCE_DISCOVERED";
     inline static const std::string GAME_COMPLETE = "GAME_COMPLETE";
     inline static const std::string GIVE_ITEM = "GIVE_ITEM";
@@ -168,6 +173,8 @@ class Anchor : public Network {
     void SendPacket_BossHp(s16 actorId, s32 hp);
     void SendPacket_ClearTeamState(std::string teamId);
     void SendPacket_DamagePlayer(u32 clientId, u8 damageEffect, u8 damage);
+    void SendPacket_EnemyDefeated(s8 roomNum, s16 listIndex, s16 actorId, s32 colliderOrdinal, s32 element,
+                                  u32 dmgFlags, u8 effect, u8 damage);
     void SendPacket_EntranceDiscovered(u16 entranceIndex);
     void SendPacket_GameComplete();
     void SendPacket_GiveItem(u16 modId, s16 getItemId);

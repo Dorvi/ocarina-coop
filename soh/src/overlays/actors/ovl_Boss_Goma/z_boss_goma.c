@@ -1821,6 +1821,29 @@ void BossGoma_UpdateTailLimbsScale(BossGoma* this) {
     }
 }
 
+/**
+ * Co-op bosses: a teammate landed the killing blow on their copy of Gohma.
+ * Starts the normal death sequence here, whatever she was doing.
+ */
+void BossGoma_CoopForceDefeat(Actor* thisx, PlayState* play) {
+    BossGoma* this = (BossGoma*)thisx;
+
+    if (this->actionFunc == BossGoma_Defeated) {
+        return;
+    }
+
+    // She may be on the ceiling or a wall, where gravity is off: let her drop, so the death
+    // sequence (and the heart container and warp it leaves behind) ends up on the floor.
+    this->actor.gravity = -2.0f;
+    this->actor.velocity.y = 0.0f;
+    this->actor.colChkInfo.health = 0;
+    this->invincibilityFrames = 10;
+
+    BossGoma_SetupDefeated(this, play);
+    Enemy_StartFinishingBlow(play, &this->actor);
+    GameInteractor_ExecuteOnBossDefeat(&this->actor);
+}
+
 void BossGoma_UpdateHit(BossGoma* this, PlayState* play) {
     if (this->invincibilityFrames != 0) {
         this->invincibilityFrames--;

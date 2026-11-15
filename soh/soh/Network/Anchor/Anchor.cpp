@@ -20,6 +20,7 @@ void Anchor::Enable() {
     roomState.ownerClientId = 0;
     roomState.sharedBosses = 0;
     roomState.bossHealthBonus = 0;
+    roomState.sharedEnemies = 0;
 }
 
 void Anchor::Disable() {
@@ -139,6 +140,8 @@ void Anchor::ProcessIncomingPacketQueue() {
                 HandlePacket_DamagePlayer(payload);
             else if (packetType == DISABLE_ANCHOR)
                 HandlePacket_DisableAnchor(payload);
+            else if (packetType == ENEMY_DEFEATED)
+                HandlePacket_EnemyDefeated(payload);
             else if (packetType == ENTRANCE_DISCOVERED)
                 HandlePacket_EntranceDiscovered(payload);
             else if (packetType == GAME_COMPLETE)

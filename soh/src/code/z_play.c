@@ -16,6 +16,7 @@
 
 #include <time.h>
 #include <assert.h>
+#include "soh/Network/Anchor/CoopEnemies.h"
 
 TransitionUnk sTrnsnUnk;
 s32 gTrnsnUnkState;
@@ -1159,6 +1160,8 @@ void Play_Update(PlayState* play) {
 
                     PLAY_LOG(3624);
                     CollisionCheck_Damage(play, &play->colChkCtx);
+                    // Co-op enemies: this frame's hits are known and no actor has reacted to them yet
+                    CoopEnemies_AfterCollisionCheck(play);
 
                     PLAY_LOG(3631);
                     CollisionCheck_ClearContext(play, &play->colChkCtx);

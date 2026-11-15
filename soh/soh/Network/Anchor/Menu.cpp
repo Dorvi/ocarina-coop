@@ -240,6 +240,20 @@ void AnchorAdminMenu(WidgetInfo& info) {
                          "0: bosses have their normal health."))) {
         anchor->SendPacket_UpdateRoomState();
     }
+
+    ImGui::SeparatorText("Co-op Enemies");
+
+    if (UIWidgets::CVarCheckbox(
+            "Shared Enemies", CVAR_REMOTE_ANCHOR("RoomSettings.SharedEnemies"),
+            UIWidgets::CheckboxOptions()
+                .DefaultValue(true)
+                .Color(THEME_COLOR)
+                .Tooltip("When a teammate in the same room kills an enemy, it dies on everyone's screen at the "
+                         "same moment, with its normal death animation.\n\n"
+                         "Each player still sees their own copy of the enemy moving and attacking. Enemies the "
+                         "game generates on the fly (Stalchildren, Leevers, ...) are not shared."))) {
+        anchor->SendPacket_UpdateRoomState();
+    }
 }
 
 void AnchorInstructionsMenu(WidgetInfo& info) {
