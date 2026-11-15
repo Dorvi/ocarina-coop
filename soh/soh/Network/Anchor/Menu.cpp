@@ -213,6 +213,33 @@ void AnchorAdminMenu(WidgetInfo& info) {
                                 UIWidgets::CheckboxOptions().DefaultValue(true).Color(THEME_COLOR))) {
         anchor->SendPacket_UpdateRoomState();
     }
+
+    ImGui::SeparatorText("Co-op Bosses");
+
+    if (UIWidgets::CVarCheckbox(
+            "Shared Bosses", CVAR_REMOTE_ANCHOR("RoomSettings.SharedBosses"),
+            UIWidgets::CheckboxOptions()
+                .DefaultValue(true)
+                .Color(THEME_COLOR)
+                .Tooltip("Teammates in the same boss room share one boss health bar: every hit counts for "
+                         "everyone, and when one player lands the killing blow the boss is defeated for all.\n\n"
+                         "Each player still sees their own copy of the boss moving and attacking."))) {
+        anchor->SendPacket_UpdateRoomState();
+    }
+    if (UIWidgets::CVarSliderInt(
+            "Boss HP per extra player: +%d%%", CVAR_REMOTE_ANCHOR("RoomSettings.BossHealthBonus"),
+            UIWidgets::IntSliderOptions()
+                .Min(0)
+                .Max(300)
+                .Step(25)
+                .DefaultValue(100)
+                .Color(THEME_COLOR)
+                .Tooltip("How much longer bosses last for each extra teammate in the boss room.\n\n"
+                         "+100%: 2 players need 2x the hits, 3 players 3x.\n"
+                         "+50%: 2 players 1.5x, 3 players 2x.\n"
+                         "0: bosses have their normal health."))) {
+        anchor->SendPacket_UpdateRoomState();
+    }
 }
 
 void AnchorInstructionsMenu(WidgetInfo& info) {

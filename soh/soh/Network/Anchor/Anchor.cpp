@@ -18,6 +18,8 @@ void Anchor::Enable() {
                     CVarGetInteger(CVAR_REMOTE_ANCHOR("Port"), 43383));
     ownClientId = CVarGetInteger(CVAR_REMOTE_ANCHOR("LastClientId"), 0);
     roomState.ownerClientId = 0;
+    roomState.sharedBosses = 0;
+    roomState.bossHealthBonus = 0;
 }
 
 void Anchor::Disable() {
@@ -129,6 +131,10 @@ void Anchor::ProcessIncomingPacketQueue() {
             // packetType here is a string so we can't use a switch statement
             if (packetType == ALL_CLIENT_STATE)
                 HandlePacket_AllClientState(payload);
+            else if (packetType == BOSS_DEFEATED)
+                HandlePacket_BossDefeated(payload);
+            else if (packetType == BOSS_HP)
+                HandlePacket_BossHp(payload);
             else if (packetType == DAMAGE_PLAYER)
                 HandlePacket_DamagePlayer(payload);
             else if (packetType == DISABLE_ANCHOR)

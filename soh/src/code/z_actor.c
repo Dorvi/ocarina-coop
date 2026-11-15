@@ -82,6 +82,7 @@
 #include "textures/place_title_cards/g_pn_55.h"
 #include "textures/place_title_cards/g_pn_56.h"
 #include "textures/place_title_cards/g_pn_57.h"
+#include "soh/Network/Anchor/CoopBoss.h"
 #endif
 
 static CollisionPoly* sCurCeilingPoly;
@@ -4774,10 +4775,13 @@ u8 func_800355E4(PlayState* play, Collider* collider) {
 }
 
 u8 Actor_ApplyDamage(Actor* actor) {
-    if (actor->colChkInfo.damage >= actor->colChkInfo.health) {
+    // Co-op bosses: hits on a shared boss are scaled by the number of teammates (no-op otherwise)
+    s32 damage = CoopBoss_ScaleDamage(actor, actor->colChkInfo.damage);
+
+    if (damage >= actor->colChkInfo.health) {
         actor->colChkInfo.health = 0;
     } else {
-        actor->colChkInfo.health -= actor->colChkInfo.damage;
+        actor->colChkInfo.health -= damage;
     }
 
     return actor->colChkInfo.health;

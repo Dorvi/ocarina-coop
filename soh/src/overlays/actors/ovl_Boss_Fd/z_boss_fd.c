@@ -65,6 +65,7 @@ const ActorInit Boss_Fd_InitVars = {
 };
 
 #include "z_boss_fd_colchk.c"
+#include "soh/Network/Anchor/CoopBoss.h"
 
 static InitChainEntry sInitChain[] = {
     ICHAIN_U8(targetMode, 5, ICHAIN_CONTINUE),
@@ -1291,10 +1292,8 @@ void BossFd_CollisionCheck(BossFd* this, PlayState* play) {
     if (headCollider->info.bumperFlags & BUMP_HIT) {
         headCollider->info.bumperFlags &= ~BUMP_HIT;
         hurtbox = headCollider->info.acHitInfo;
-        this->actor.colChkInfo.health -= 2;
-        if (hurtbox->toucher.dmgFlags & 0x1000) {
-            this->actor.colChkInfo.health -= 2;
-        }
+        this->actor.colChkInfo.health -=
+            CoopBoss_ScaleDamage(&this->actor, (hurtbox->toucher.dmgFlags & 0x1000) ? 4 : 2);
         if ((s8)this->actor.colChkInfo.health <= 2) {
             this->actor.colChkInfo.health = 2;
         }

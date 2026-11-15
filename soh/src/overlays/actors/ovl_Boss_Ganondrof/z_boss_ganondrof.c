@@ -13,6 +13,7 @@
 #include "overlays/actors/ovl_Door_Warp1/z_door_warp1.h"
 #include "soh/OTRGlobals.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Network/Anchor/CoopBoss.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -1220,7 +1221,7 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                         dmg = CollisionCheck_GetSwordDamage(dmgFlags, play);
                         (dmg == 0) ? (dmg = 2) : (canKill = true);
                         if (((s8)this->actor.colChkInfo.health > 2) || canKill) {
-                            this->actor.colChkInfo.health -= dmg;
+                            this->actor.colChkInfo.health -= CoopBoss_ScaleDamage(&this->actor, dmg);
                         }
 
                         if ((s8)this->actor.colChkInfo.health <= 0) {
@@ -1242,7 +1243,7 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                 }
             } else if (acHit && (hurtbox->toucher.dmgFlags & 0x0001F8A4)) {
                 this->work[GND_INVINC_TIMER] = 10;
-                this->actor.colChkInfo.health -= 2;
+                this->actor.colChkInfo.health -= CoopBoss_ScaleDamage(&this->actor, 2);
                 horse->hitTimer = 20;
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_DAMAGE);
             }

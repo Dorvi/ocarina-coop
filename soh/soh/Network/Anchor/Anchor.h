@@ -68,6 +68,9 @@ typedef struct {
     u8 showLocationsMode; // 0 = none, 1 = team, 2 = all
     u8 teleportMode;      // 0 = off, 1 = team, 2 = all
     u8 syncItemsAndFlags; // 0 = off, 1 = on
+    // Co-op bosses (see CoopBoss.h)
+    u8 sharedBosses;     // 0 = off, 1 = on: teammates in the same boss room share one boss health pool
+    u16 bossHealthBonus; // extra boss HP per additional teammate in the room, in percent (100 = 2 players -> 2x)
 } RoomState;
 
 class Anchor : public Network {
@@ -85,10 +88,13 @@ class Anchor : public Network {
     nlohmann::json PrepClientState();
     nlohmann::json PrepRoomState();
     void RegisterHooks();
+    void RegisterCoopBossHooks();
     void RefreshClientActors();
     void SetDummyPlayerClientId(const Actor* actor, uint32_t clientId);
 
     void HandlePacket_AllClientState(nlohmann::json payload);
+    void HandlePacket_BossDefeated(nlohmann::json payload);
+    void HandlePacket_BossHp(nlohmann::json payload);
     void HandlePacket_ConsumeAdultTradeItem(nlohmann::json payload);
     void HandlePacket_DamagePlayer(nlohmann::json payload);
     void HandlePacket_DisableAnchor(nlohmann::json payload);
@@ -117,6 +123,8 @@ class Anchor : public Network {
 
     // Packet types //
     inline static const std::string ALL_CLIENT_STATE = "ALL_CLIENT_STATE";
+    inline static const std::string BOSS_DEFEATED = "BOSS_DEFEATED";
+    inline static const std::string BOSS_HP = "BOSS_HP";
     inline static const std::string DAMAGE_PLAYER = "DAMAGE_PLAYER";
     inline static const std::string DISABLE_ANCHOR = "DISABLE_ANCHOR";
     inline static const std::string ENTRANCE_DISCOVERED = "ENTRANCE_DISCOVERED";
@@ -156,6 +164,8 @@ class Anchor : public Network {
     bool CanTeleportTo(uint32_t clientId);
     uint32_t GetDummyPlayerClientId(const Actor* actor);
 
+    void SendPacket_BossDefeated(s16 actorId);
+    void SendPacket_BossHp(s16 actorId, s32 hp);
     void SendPacket_ClearTeamState(std::string teamId);
     void SendPacket_DamagePlayer(u32 clientId, u8 damageEffect, u8 damage);
     void SendPacket_EntranceDiscovered(u16 entranceIndex);
@@ -189,10 +199,10 @@ class AnchorRoomWindow : public Ship::GuiWindow {
   public:
     using GuiWindow::GuiWindow;
 
-    void InitElement() override{};
+    void InitElement() override {};
     void DrawElement() override;
     void Draw() override;
-    void UpdateElement() override{};
+    void UpdateElement() override {};
 };
 
 #endif // __cplusplus

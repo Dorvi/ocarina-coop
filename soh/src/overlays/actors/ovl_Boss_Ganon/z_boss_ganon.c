@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <libultraship/bridge/consolevariablebridge.h>
+#include "soh/Network/Anchor/CoopBoss.h"
 
 #define FLAGS                                                                                 \
     (ACTOR_FLAG_ATTENTION_ENABLED | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_UPDATE_CULLING_DISABLED | \
@@ -2797,7 +2798,7 @@ void BossGanon_UpdateDamage(BossGanon* this, PlayState* play) {
                 }
 
                 if (((s8)this->actor.colChkInfo.health >= 3) || hitWithSword) {
-                    this->actor.colChkInfo.health -= damage;
+                    this->actor.colChkInfo.health -= CoopBoss_ScaleDamage(&this->actor, damage);
                 }
 
                 for (i = 0; i < ARRAY_COUNT(sCape->strands); i++) {

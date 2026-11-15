@@ -64,6 +64,7 @@ const ActorInit Boss_Fd2_InitVars = {
 };
 
 #include "z_boss_fd2_colchk.c"
+#include "soh/Network/Anchor/CoopBoss.h"
 
 static Vec3f sHoleLocations[] = {
     { 0.0f, 90.0f, -243.0f },    { 0.0f, 90.0f, 0.0f },    { 0.0f, 90.0f, 243.0f },
@@ -844,7 +845,7 @@ void BossFd2_CollisionCheck(BossFd2* this, PlayState* play) {
         hurtbox = this->collider.elements[0].info.acHitInfo;
         if (!bossFd->faceExposed) {
             if (hurtbox->toucher.dmgFlags & 0x40000040) {
-                bossFd->actor.colChkInfo.health -= 2;
+                bossFd->actor.colChkInfo.health -= CoopBoss_ScaleDamage(&bossFd->actor, 2);
                 if ((s8)bossFd->actor.colChkInfo.health <= 2) {
                     bossFd->actor.colChkInfo.health = 1;
                 }
@@ -883,7 +884,7 @@ void BossFd2_CollisionCheck(BossFd2* this, PlayState* play) {
                 damage = 0;
             }
             if (((s8)bossFd->actor.colChkInfo.health > 2) || canKill) {
-                bossFd->actor.colChkInfo.health -= damage;
+                bossFd->actor.colChkInfo.health -= CoopBoss_ScaleDamage(&bossFd->actor, damage);
                 osSyncPrintf(VT_FGCOL(GREEN));
                 osSyncPrintf("damage   %d\n", damage);
             }

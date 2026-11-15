@@ -62,6 +62,7 @@ const ActorInit Boss_Dodongo_InitVars = {
 };
 
 #include "z_boss_dodongo_data.c"
+#include "soh/Network/Anchor/CoopBoss.h"
 
 static u8 sMaskTex16x16[16 * 16] = { { 0 } };
 static u8 sMaskTex8x16[8 * 16] = { { 0 } };
@@ -734,7 +735,7 @@ void BossDodongo_Explode(BossDodongo* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_IT_BOMB_EXPLOSION);
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DAMAGE);
         Actor_RequestQuakeAndRumble(&this->actor, play, 4, 10);
-        this->health -= 2;
+        this->health -= CoopBoss_ScaleDamage(&this->actor, 2);
 
         // make sure not to die from the bomb explosion
         if (this->health <= 0) {
@@ -1515,7 +1516,7 @@ void BossDodongo_UpdateDamage(BossDodongo* this, PlayState* play) {
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_K_DAMAGE);
                     BossDodongo_SetupDamaged(this);
                     this->unk_1C0 = 5;
-                    this->health -= swordDamage;
+                    this->health -= CoopBoss_ScaleDamage(&this->actor, swordDamage);
                 }
             }
         }
